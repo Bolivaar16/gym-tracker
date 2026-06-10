@@ -8,5 +8,6 @@ public record AppProperties(
         String passwordHash,
         String jwtSecret,
         long jwtTtlSeconds,
-        String coachProfileNotes
+        String coachProfileNotes,
+        String anthropicApiKey
 ) {}

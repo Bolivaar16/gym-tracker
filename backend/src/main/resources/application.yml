@@ -17,6 +17,7 @@ app:
   jwt-secret: ${JWT_SECRET}
   jwt-ttl-seconds: ${JWT_TTL_SECONDS:86400}
   coach-profile-notes: ${COACH_PROFILE_NOTES:}
+  anthropic-api-key: ${ANTHROPIC_API_KEY:}
 
 springdoc:
   swagger-ui:

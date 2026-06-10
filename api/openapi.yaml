@@ -19,6 +19,8 @@ tags:
     description: Sets within a workout exercise
   - name: templates
     description: Workout templates
+  - name: coach
+    description: AI coach (Anthropic-powered)
   - name: stats
     description: Read-only training analytics
 
@@ -485,6 +487,36 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /api/coach/ask:
+    post:
+      tags: [coach]
+      summary: Ask the AI coach a question
+      description: Stateless. Optionally includes recent workouts and PRs as context for the model.
+      operationId: askCoach
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoachRequest'
+      responses:
+        '200':
+          description: Coach reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          description: AI coach is not configured or the upstream AI service failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /api/stats/volume:
     get:
@@ -988,6 +1020,33 @@ components:
           format: double
           minimum: 0
           nullable: true
+
+    CoachRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          example: "What should I focus on today?"
+        includeRecentWorkouts:
+          type: boolean
+          default: true
+        includePersonalRecords:
+          type: boolean
+          default: true
+
+    CoachResponse:
+      type: object
+      required: [reply, contextSummary]
+      properties:
+        reply:
+          type: string
+          example: "Based on your last 7 days..."
+        contextSummary:
+          type: string
+          example: "Used: 3 recent workouts, 12 PRs"
 
     VolumeGroupBy:
       type: string

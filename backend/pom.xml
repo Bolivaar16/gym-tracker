@@ -23,6 +23,7 @@
     <springdoc.version>2.5.0</springdoc.version>
     <testcontainers.version>1.19.8</testcontainers.version>
     <archunit.version>1.3.0</archunit.version>
+    <anthropic-sdk.version>2.40.1</anthropic-sdk.version>
   </properties>
 
   <dependencies>
@@ -117,6 +118,13 @@
       <artifactId>archunit-junit5</artifactId>
       <version>${archunit.version}</version>
       <scope>test</scope>
+    </dependency>
+
+    <!-- Anthropic Claude SDK -->
+    <dependency>
+      <groupId>com.anthropic</groupId>
+      <artifactId>anthropic-java</artifactId>
+      <version>${anthropic-sdk.version}</version>
     </dependency>
   </dependencies>
 

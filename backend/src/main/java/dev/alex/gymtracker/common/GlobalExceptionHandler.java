@@ -38,6 +38,12 @@ public class GlobalExceptionHandler {
             new ErrorResponse(400, "Bad Request", ex.getMessage(), Instant.now(), null));
     }
 
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleServiceUnavailable(ServiceUnavailableException ex) {
+        return ResponseEntity.status(503).body(
+            new ErrorResponse(503, "Service Unavailable", ex.getMessage(), Instant.now(), null));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         return ResponseEntity.status(500).body(
