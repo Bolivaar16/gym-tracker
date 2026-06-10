@@ -19,6 +19,8 @@ tags:
     description: Sets within a workout exercise
   - name: templates
     description: Workout templates
+  - name: stats
+    description: Read-only training analytics
 
 paths:
   /api/auth/token:
@@ -484,6 +486,106 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /api/stats/volume:
+    get:
+      tags: [stats]
+      summary: Total training volume per time period
+      operationId: getVolumeStats
+      parameters:
+        - name: groupBy
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/VolumeGroupBy'
+        - name: muscleGroup
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/MuscleGroup'
+        - name: from
+          in: query
+          required: false
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: false
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Volume per period, chronological order. Empty array when no data.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VolumePoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/stats/exercises/{id}/one-rm:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [stats]
+      summary: Best estimated 1RM (Epley) per workout for an exercise
+      operationId: getExerciseOneRm
+      parameters:
+        - name: from
+          in: query
+          required: false
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: false
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: One point per workout containing the exercise, ordered by date ascending.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OneRmPoint'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/stats/prs:
+    get:
+      tags: [stats]
+      summary: Current personal records per exercise
+      operationId: getPersonalRecords
+      responses:
+        '200':
+          description: One entry per exercise that has at least one logged set, ordered by exercise name.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonalRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/stats/summary:
+    get:
+      tags: [stats]
+      summary: Dashboard summary (current week/month/streak)
+      operationId: getStatsSummary
+      responses:
+        '200':
+          description: Summary values; zeros when there is no history.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -886,6 +988,73 @@ components:
           format: double
           minimum: 0
           nullable: true
+
+    VolumeGroupBy:
+      type: string
+      enum: [week, month]
+
+    VolumePoint:
+      type: object
+      required: [period, volumeKg]
+      properties:
+        period:
+          type: string
+          description: ISO week ("2026-W01") or month ("2026-06") depending on groupBy
+          example: "2026-W01"
+        volumeKg:
+          type: number
+          format: double
+
+    OneRmPoint:
+      type: object
+      required: [date, workoutId, estimatedOneRmKg]
+      properties:
+        date:
+          type: string
+          format: date
+        workoutId:
+          type: integer
+          format: int64
+        estimatedOneRmKg:
+          type: number
+          format: double
+
+    ExerciseRef:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    PersonalRecord:
+      type: object
+      required: [exercise, maxWeightKg, maxWeightDate, maxWeightWorkoutId,
+                 maxOneRmKg, maxOneRmDate, maxOneRmWorkoutId,
+                 maxReps, maxRepsDate, maxRepsWorkoutId]
+      properties:
+        exercise:
+          $ref: '#/components/schemas/ExerciseRef'
+        maxWeightKg: { type: number, format: double }
+        maxWeightDate: { type: string, format: date }
+        maxWeightWorkoutId: { type: integer, format: int64 }
+        maxOneRmKg: { type: number, format: double }
+        maxOneRmDate: { type: string, format: date }
+        maxOneRmWorkoutId: { type: integer, format: int64 }
+        maxReps: { type: integer }
+        maxRepsDate: { type: string, format: date }
+        maxRepsWorkoutId: { type: integer, format: int64 }
+
+    StatsSummary:
+      type: object
+      required: [workoutsThisWeek, workoutsThisMonth, totalVolumeThisWeekKg, currentStreakDays]
+      properties:
+        workoutsThisWeek: { type: integer }
+        workoutsThisMonth: { type: integer }
+        totalVolumeThisWeekKg: { type: number, format: double }
+        currentStreakDays: { type: integer }
 
     CreateTemplateRequest:
       type: object
