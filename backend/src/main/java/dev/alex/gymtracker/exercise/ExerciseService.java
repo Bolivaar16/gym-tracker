@@ -51,6 +51,15 @@ public class ExerciseService {
         repo.save(e);
     }
 
+    @Transactional
+    public Exercise patch(Long id, dev.alex.gymtracker.api.model.PatchExerciseRequest req) {
+        Exercise e = get(id);
+        if (req.getDefaultRestSeconds() != null) {
+            e.setDefaultRestSeconds(req.getDefaultRestSeconds());
+        }
+        return repo.save(e);
+    }
+
     private void applyRequest(Exercise e, CreateExerciseRequest req) {
         e.setName(req.getName());
         e.setMuscleGroups(

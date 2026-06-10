@@ -19,3 +19,38 @@ cp .env.example .env   # fill in secrets
 - `api/` — OpenAPI 3 spec (source of truth)
 - `backend/` — Spring Boot application
 - `mobile/` — React Native (Expo) app
+
+## API Endpoints
+
+All endpoints except `/api/auth/token` require a Bearer JWT.
+
+### Auth
+- `POST /api/auth/token` — Issue a JWT token
+
+### Exercises
+- `GET /api/exercises` — List exercises (filter by muscle group, optionally include archived)
+- `POST /api/exercises` — Create an exercise
+- `GET /api/exercises/{id}` — Get an exercise
+- `PUT /api/exercises/{id}` — Update an exercise
+- `PATCH /api/exercises/{id}` — Partially update an exercise (e.g., `defaultRestSeconds`)
+- `DELETE /api/exercises/{id}` — Archive an exercise (soft delete)
+
+### Workouts
+- `POST /api/workouts` — Start a new workout session
+- `GET /api/workouts` — List workouts (paginated, most recent first)
+- `GET /api/workouts/{id}` — Get full workout detail with exercises and sets
+- `PUT /api/workouts/{id}` — Update workout (notes, finish time)
+- `DELETE /api/workouts/{id}` — Delete a workout and all its sets
+
+### Sets
+- `POST /api/workouts/{workoutId}/exercises/{exerciseId}/sets` — Log a set
+- `PUT /api/workouts/{workoutId}/exercises/{exerciseId}/sets/{setId}` — Update a set
+- `DELETE /api/workouts/{workoutId}/exercises/{exerciseId}/sets/{setId}` — Delete a set
+
+### Templates
+- `GET /api/templates` — List templates
+- `POST /api/templates` — Create a template
+- `GET /api/templates/{id}` — Get template detail with ordered exercises and targets
+- `PUT /api/templates/{id}` — Update a template (full replace of exercise list)
+- `DELETE /api/templates/{id}` — Delete a template
+- `POST /api/templates/{id}/start` — Start a workout from a template (pre-populates exercises)

@@ -17,6 +17,8 @@ tags:
     description: Workout sessions
   - name: sets
     description: Sets within a workout exercise
+  - name: templates
+    description: Workout templates
 
 paths:
   /api/auth/token:
@@ -150,6 +152,29 @@ paths:
       responses:
         '204':
           description: Exercise archived
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [exercises]
+      summary: Partially update an exercise
+      operationId: patchExercise
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchExerciseRequest'
+      responses:
+        '200':
+          description: Exercise updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exercise'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -324,6 +349,136 @@ paths:
       responses:
         '204':
           description: Set deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/templates:
+    get:
+      tags: [templates]
+      summary: List templates
+      operationId: listTemplates
+      responses:
+        '200':
+          description: Template list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemplateSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [templates]
+      summary: Create a template
+      operationId: createTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTemplateRequest'
+      responses:
+        '201':
+          description: Template created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: A referenced exercise does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: A template with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/templates/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [templates]
+      summary: Get template detail with ordered exercises and targets
+      operationId: getTemplate
+      responses:
+        '200':
+          description: Template detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [templates]
+      summary: Update a template (full replace of the exercise list)
+      operationId: updateTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTemplateRequest'
+      responses:
+        '200':
+          description: Template updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: A template with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [templates]
+      summary: Delete a template
+      description: Hard delete. Workouts previously started from this template are kept (their templateId becomes null).
+      operationId: deleteTemplate
+      responses:
+        '204':
+          description: Template deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/templates/{id}/start:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [templates]
+      summary: Start a workout from this template
+      description: Creates a new workout pre-populated with the template's exercises in order (no sets). Later edits to the template do not affect the created workout.
+      operationId: startWorkoutFromTemplate
+      responses:
+        '201':
+          description: Workout created from template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workout'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -646,3 +801,106 @@ components:
                 type: string
               message:
                 type: string
+
+    PatchExerciseRequest:
+      type: object
+      properties:
+        defaultRestSeconds:
+          type: integer
+          minimum: 0
+
+    TemplateExerciseItem:
+      type: object
+      required: [exercise, position, targetSets, targetReps]
+      properties:
+        exercise:
+          $ref: '#/components/schemas/Exercise'
+        position:
+          type: integer
+          minimum: 1
+        targetSets:
+          type: integer
+          minimum: 1
+        targetReps:
+          type: integer
+          minimum: 1
+        targetWeightKg:
+          type: number
+          format: double
+          minimum: 0
+          nullable: true
+
+    Template:
+      type: object
+      required: [id, name, createdAt, exercises]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateExerciseItem'
+
+    TemplateSummary:
+      type: object
+      required: [id, name, exerciseCount]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        exerciseCount:
+          type: integer
+
+    TemplateExerciseInput:
+      type: object
+      required: [exerciseId]
+      description: Position is implied by array order (1-based).
+      properties:
+        exerciseId:
+          type: integer
+          format: int64
+        targetSets:
+          type: integer
+          minimum: 1
+          default: 3
+        targetReps:
+          type: integer
+          minimum: 1
+          default: 10
+        targetWeightKg:
+          type: number
+          format: double
+          minimum: 0
+          nullable: true
+
+    CreateTemplateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        notes:
+          type: string
+          nullable: true
+          maxLength: 1000
+        exercises:
+          type: array
+          description: Ordered exercise list. Omitted or empty means a template with no exercises.
+          items:
+            $ref: '#/components/schemas/TemplateExerciseInput'

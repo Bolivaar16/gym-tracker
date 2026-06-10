@@ -87,4 +87,64 @@ class ExerciseControllerIT extends IntegrationTestBase {
         mockMvc.perform(get("/api/exercises"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void patchExercise_updatesOnlyRestSeconds() throws Exception {
+        String createBody = """
+                {"name":"Patch Test Exercise","muscleGroups":["LEGS"],"defaultRestSeconds":120}
+                """;
+        String resp = mockMvc.perform(post("/api/exercises")
+                        .header("Authorization", "Bearer " + token())
+                        .contentType(MediaType.APPLICATION_JSON).content(createBody))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        long id = com.fasterxml.jackson.databind.json.JsonMapper.builder().build()
+                .readTree(resp).get("id").asLong();
+
+        String patchBody = """
+                {"defaultRestSeconds":90}
+                """;
+        mockMvc.perform(patch("/api/exercises/" + id)
+                        .header("Authorization", "Bearer " + token())
+                        .contentType(MediaType.APPLICATION_JSON).content(patchBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.defaultRestSeconds").value(90))
+                .andExpect(jsonPath("$.name").value("Patch Test Exercise"))
+                .andExpect(jsonPath("$.muscleGroups[0]").value("LEGS"));
+    }
+
+    @Test
+    void patchExercise_notFound_returns404() throws Exception {
+        String patchBody = """
+                {"defaultRestSeconds":90}
+                """;
+        mockMvc.perform(patch("/api/exercises/999999")
+                        .header("Authorization", "Bearer " + token())
+                        .contentType(MediaType.APPLICATION_JSON).content(patchBody))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void patchExercise_negativeValue_returns400() throws Exception {
+        String createBody = """
+                {"name":"Negative Rest Exercise","muscleGroups":["BACK"],"defaultRestSeconds":120}
+                """;
+        String resp = mockMvc.perform(post("/api/exercises")
+                        .header("Authorization", "Bearer " + token())
+                        .contentType(MediaType.APPLICATION_JSON).content(createBody))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        long id = com.fasterxml.jackson.databind.json.JsonMapper.builder().build()
+                .readTree(resp).get("id").asLong();
+
+        String patchBody = """
+                {"defaultRestSeconds":-1}
+                """;
+        mockMvc.perform(patch("/api/exercises/" + id)
+                        .header("Authorization", "Bearer " + token())
+                        .contentType(MediaType.APPLICATION_JSON).content(patchBody))
+                .andExpect(status().isBadRequest());
+    }
 }

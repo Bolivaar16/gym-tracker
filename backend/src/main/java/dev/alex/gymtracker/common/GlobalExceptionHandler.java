@@ -32,6 +32,12 @@ public class GlobalExceptionHandler {
             new ErrorResponse(400, "Bad Request", "Validation failed", Instant.now(), details));
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
+        return ResponseEntity.status(400).body(
+            new ErrorResponse(400, "Bad Request", ex.getMessage(), Instant.now(), null));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         return ResponseEntity.status(500).body(

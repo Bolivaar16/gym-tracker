@@ -54,6 +54,12 @@ public class ExerciseController implements ExercisesApi {
         return ResponseEntity.noContent().build();
     }
 
+    @Override
+    public ResponseEntity<dev.alex.gymtracker.api.model.Exercise> patchExercise(
+            Long id, dev.alex.gymtracker.api.model.PatchExerciseRequest patchExerciseRequest) {
+        return ResponseEntity.ok(toDto(service.patch(id, patchExerciseRequest)));
+    }
+
     public dev.alex.gymtracker.api.model.Exercise toDto(Exercise e) {
         dev.alex.gymtracker.api.model.Exercise dto = new dev.alex.gymtracker.api.model.Exercise();
         dto.setId(e.getId());

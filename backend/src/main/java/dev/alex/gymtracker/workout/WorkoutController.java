@@ -67,7 +67,7 @@ public class WorkoutController implements WorkoutsApi {
 
     // ── Mappers ───────────────────────────────────────────────────────────────
 
-    dev.alex.gymtracker.api.model.Workout toDetailDto(dev.alex.gymtracker.workout.Workout w) {
+    public dev.alex.gymtracker.api.model.Workout toDetailDto(dev.alex.gymtracker.workout.Workout w) {
         dev.alex.gymtracker.api.model.Workout dto = new dev.alex.gymtracker.api.model.Workout();
         dto.setId(w.getId());
         dto.setStartedAt(toOffsetDateTime(w.getStartedAt()));
