@@ -281,7 +281,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Set'
+                $ref: '#/components/schemas/WorkoutSet'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -310,7 +310,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Set'
+                $ref: '#/components/schemas/WorkoutSet'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -474,7 +474,7 @@ components:
           nullable: true
           maxLength: 500
 
-    Set:
+    WorkoutSet:
       type: object
       required: [id, setNumber, reps, weightKg, completedAt]
       properties:
@@ -531,7 +531,7 @@ components:
         sets:
           type: array
           items:
-            $ref: '#/components/schemas/Set'
+            $ref: '#/components/schemas/WorkoutSet'
 
     Workout:
       type: object
