@@ -1,0 +1,34 @@
+#!/bin/sh
+# Maven Wrapper script for Unix/Linux/macOS
+# Generated for Apache Maven 3.9.6
+
+set -e
+
+MAVEN_WRAPPER_PROPERTIES="$(dirname "$0")/.mvn/wrapper/maven-wrapper.properties"
+
+if [ -r "$MAVEN_WRAPPER_PROPERTIES" ]; then
+    DISTRIBUTION_URL=$(grep "distributionUrl" "$MAVEN_WRAPPER_PROPERTIES" | sed 's/distributionUrl=//')
+fi
+
+MAVEN_USER_HOME="${MAVEN_USER_HOME:-${HOME}/.m2}"
+MAVEN_BASE_URL="${DISTRIBUTION_URL:-https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.6/apache-maven-3.9.6-bin.zip}"
+MAVEN_HOME="${MAVEN_USER_HOME}/wrapper/dists/apache-maven-3.9.6"
+
+if [ ! -d "${MAVEN_HOME}" ]; then
+    echo "Downloading Maven..."
+    mkdir -p "${MAVEN_HOME}"
+    TMP_ZIP="${MAVEN_HOME}/mvn.zip"
+    if command -v curl > /dev/null 2>&1; then
+        curl -fsSL "${MAVEN_BASE_URL}" -o "${TMP_ZIP}"
+    elif command -v wget > /dev/null 2>&1; then
+        wget -q "${MAVEN_BASE_URL}" -O "${TMP_ZIP}"
+    else
+        echo "ERROR: Neither curl nor wget found. Install one to use the Maven Wrapper." >&2
+        exit 1
+    fi
+    unzip -q "${TMP_ZIP}" -d "${MAVEN_HOME}"
+    rm "${TMP_ZIP}"
+fi
+
+MAVEN_BIN=$(find "${MAVEN_HOME}" -name "mvn" -type f | head -1)
+exec "${MAVEN_BIN}" "$@"

@@ -1,0 +1,28 @@
+# Java
+target/
+*.class
+*.jar
+*.war
+.mvn/timing.properties
+
+# Spring Boot
+*.log
+application-local.yml
+.env
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+*.orig.*
+web-build/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:gymtracker}
+    username: ${DB_USER:gymtracker}
+    password: ${DB_PASSWORD:gymtracker}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+app:
+  username: ${APP_USER:admin}
+  password-hash: ${APP_PASSWORD_HASH}
+  jwt-secret: ${JWT_SECRET}
+  jwt-ttl-seconds: ${JWT_TTL_SECONDS:86400}
+  coach-profile-notes: ${COACH_PROFILE_NOTES:}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
